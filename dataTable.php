@@ -35,14 +35,13 @@
 	<body>
 		<?php
 			
-			//calls function to validate info from form submission on index page.
-			$errorMessagesArray = validateInput();
-			//calls function to generate HTML for page, some common and some depeninding on validation.
+			//calls function to see whether correct username and password were entered.
+			$errorMessagesArray = checkUsernameAndPassword();
+			//calls function to generate HTML for page, some common and some depending on username and password check.
 			commonMarkup($errorMessagesArray);
 			
-			//validates form input from index page using regular expressions and adds an error message to the error message array if an error is found
-			//the strings are not sanitized because the regular expressions don't allow for HTML tags to be added
-			function validateInput() {
+			//checks the username and password entered against a hard-coded user.
+			function checkUsernameAndPassword() {
 			
 				$errorMessagesArray = array();
 			
@@ -66,86 +65,24 @@
 					echo "<h3 class= \"text-center\"><span class = \"text-danger\" >$errorMessage</span></h3>";
 			}
 			
-			//displays the store information in a formatted table
-			function markup_StorePropertiesTable() {
+			//displays the player information in a formatted table
+			function markup_playerInformation() {
 				
 				try{
 
 					$dbh = new PDO("mysql:host=localhost;dbname=soccer_players","root","");
-					//echo "<script>alert('hola')</script>";
 
 				} catch(Exception $e){
 
-					echo "<script>alert('puta')</script>";
 					$msg = $e->getMessage();
-					echo "<p>$msg</p>";
-					//echo "<script>alert($msg)</script>";
 					//die("<p>ERROR:Couldn'tconnect.{$e‐>getMessage()}</p></body></html>");
 				}
 
-
 				$sql = $dbh->prepare("SELECT * FROM player_information");
-				
-				//$query = $dbh->query("SELECT * FROM `player_information`");
-				//echo "<script>alert('query: ' . $query)</script>";
-
-				//if($query)
-					//echo "<script>alert('true')</script>";
-				//else
-					//echo "<script>alert('false')</script>";
-
-
-
 				$sql->execute();
-
-				/*while($result = $sql->fetch(PDO::FETCH_ASSOC)){
-				
-					echo $result['Player ID'];
-					echo $result['Name'];
-					echo $result['Position'];
-					echo $result['Skill Level'];
-					echo $result['Club'];
-					echo $result['Country'];
-					echo $result['Description'];
-					echo $result['Date Entered'];
-				
-				}
-				/*$command = "SELECT * FROM player_information";
-				$stmnt = $dbh->prepare($command);
-				//$stmnt->execute();
-				echo "<script>alert('1')</script>";
-				$users = $stmnt->fetchAll();
-				echo "<script>alert('2')</script>";
-				echo "<script>alert($users[0])</script>";
-				echo "<script>alert($users)</script>";
-
-				/*for($i = 0; $i < count($users) -1; $i++){
-
-					echo "<script>alert($users[$i])</script>";
-				}*/
-
-				/*foreach ($users as $user) {
-				    echo "<script>alert('foreach')</script>";
-				    echo $user . '<br />';
-				}*/
-
-				/*if($row = $stmnt->fetch()){
-
-					echo "<table><tr>";
-
-						foreach($row as $key => $value){
-
-							echo "<td>$value</td>";
-						}
-
-					echo "</tr></table>";
-				}*/
-
-
 	
 				$dataBaseFields = array("Player_ID", "Name", "Position", "Skill_Level", "Club", "Country", "Description", "Date_Entered");
 								
-
 				echo "<h1 class= \"text-center\"><span class = \"text-danger\" >Player Information</span></h1>";
 
 				echo "<table class = \"container\">";
@@ -165,25 +102,13 @@
 					while($result = $sql->fetch(PDO::FETCH_ASSOC)){
 				
 						$x++;
-						//echo "<script>alert('yes ' + x);</script>";
 
-						$txtBoxVals = array();
-
-						for($i = 0; $i < count($dataBaseFields) - 1; $i++){
-
-							//array_push($txtBoxVals, $dataBaseFields[$i]);
-							//$value = $result[$dataBaseFields[$i]];
-							//echo "<script>alert($value)</script>";
-						}
-
-
-						echo "<tr onclick = \"styleDeleteButton_and_showUpdateButtons();func($txtBoxVals);setID($x);\" style = class = \"row\" id = \"clickable\" data-toggle=\"modal\" data-target=\"#myModal\" data-book-id=\"my_id_value\" >";
+						echo "<tr onclick = \"styleDeleteButton_and_showUpdateButtons();setID($x);\" style = class = \"row\" id = \"clickable\" data-toggle=\"modal\" data-target=\"#myModal\" data-book-id=\"my_id_value\" >";
 						
 						for($i = 0; $i < count($dataBaseFields) - 1; $i++){
 
 							$value = $result[$dataBaseFields[$i]];
 							echo "<td class = \"col-xs-2\" >$value</td>";
-							//echo "<script>alert($value)</script>";
 						}
 
 						echo "</tr>";
@@ -209,12 +134,14 @@
 							markup_ErrorMessages($errorMessagesArray);
 							$page = "index";
 							$buttonValue = "Back to Login";
+							$_SESSION["Logged In"] = false;
 						
 						} else {
 							
-							markup_StorePropertiesTable();
+							markup_playerInformation();
 							$page = "index";
 							$buttonValue = "Log Out";
+							$_SESSION["Logged In"] = true;
 						}
 				
 					echo "</div>";
@@ -248,67 +175,45 @@
         
 				        <div class="modal-body">
 				          
-				        	<!--p>Some text in the modal.</p-->
 				        	<form role = "form" class = "form-inline" >
 
 					            <div class = "form-group">
-					            	<script>
-
-					            		//$("document").ready(function(){
-
-						            		//func();
-
-						            		/*function func(){
-
-							            		var a = localStorage.getItem(id);
-							            		var b = document.getElementsByTagName("label")[3];
-							            		b.innerHTML = "puta";
-							            		alert(a);
-						            		}*/
-						            	//});
-
-					            	</script>
-					              <label>Name</label>
-					              <br>
-					              <input type = "text" class = "form-control" placeholder = "Enter name" required />
+					            	<label>Name</label>
+					            	<br>
+					            	<input type = "text" class = "form-control" placeholder = "Enter name" />
 					            </div>
 
 					            <div class = "form-group">
-					              <label>Position</label>
-					              <br>
-					              <!--label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Password</label-->
-					              <input type = "text" class = "form-control" placeholder = "Enter position" required />
+					            	<label>Position</label>
+					            	<br>
+					            	<input type = "text" class = "form-control" placeholder = "Enter position" />
 					            </div>
 
 					            <div class = "form-group">
-					              <label>Skill Level</label>
-					              <br>
-					              <!--label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Password</label-->
-					              <input type = "text" class = "form-control" placeholder = "Enter skill level" required />
+					            	<label>Skill Level</label>
+					            	<br>
+					            	<input type = "text" class = "form-control" placeholder = "Enter skill level" />
 					            </div>
 
 					            <div class = "form-group">
-					              <label>Club</label>
-					              <br>
-					              <!--label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Password</label-->
-					              <input type = "text" class = "form-control" placeholder = "Enter club" required />
+					            	<label>Club</label>
+					            	<br>
+					            	<input type = "text" class = "form-control" placeholder = "Enter club" />
 					            </div>
 
 					            <br>
 					        	<br>
 
 					            <div class = "form-group">
-					              <label>Country</label>
-					              <br>
-					              <!--label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Password</label-->
-					              <input type = "text" class = "form-control" placeholder = "Enter country" required />
+					            	<label>Country</label>
+					            	<br>
+					            	<input type = "text" class = "form-control" placeholder = "Enter country" />
 					            </div>
 
 					            <div class = "form-group">
-					              <label>Description</label>
-					              <br>
-					              <!--label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Password</label-->
-					              <input style = "width: 400px" type = "text" class = "form-control" placeholder = "Enter breif description of player" required />
+					            	<label>Description</label>
+					            	<br>
+					            	<input style = "width: 400px" type = "text" class = "form-control" placeholder = "Enter breif description of player" />
 					            </div>
 
 					            <!--div class="form-group">
@@ -318,29 +223,16 @@
 					              <!--input type="text" class="form-control" placeholder="Enter password">
 					            </div-->
 
-					            <!--div class="checkbox">
-					              <label><input type="checkbox" value="" checked>Remember me</label>
-					            </div-->
-
-				              	<!--button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Login</button-->
-
 								<input style = "margin-top: 25px;" type = "button" class = "btn btn-danger" onclick = "deleteRecord();" value = "Delete" />
-						        <!--button type="button" class="btn btn-default" onclick = "styleModalForInsertClickEvent();" >Insert</button-->
 						        <button style = "margin-top: 25px;" type = "button" class = "btn btn-success" onclick = "updateRecord();" >Update</button>
-						        <button style = "margin-top: 25px;" type = "button" class = "btn btn-primary" onclick = "//location.reload();" data-dismiss = "modal" >Close</button>
+						        <button style = "margin-top: 25px;" type = "button" class = "btn btn-primary" data-dismiss = "modal" >Close</button>
 
 				          	</form>
 				        
 				        </div>
 
 				        <div class="modal-footer">
-
-					        
-					        <!--button type="button" class="btn btn-default" onclick = "deleteRecord();" >Delete</button>
-					        <!--button type="button" class="btn btn-default" onclick = "styleModalForInsertClickEvent();" >Insert</button-->
-					        <!--button type="button" class="btn btn-default" onclick = "updateRecord();" >Update</button>
-					        <button type="button" class="btn btn-default" onclick = "location.reload();" data-dismiss = "modal" >Close</button-->
-
+				        
 				        </div>
       				
       				</div>
@@ -355,36 +247,6 @@
 
 	
 	<script>
-		
-		/*$('#my_modal').on('show.bs.modal', function(e) {
-
-				var bookId = $(e.relatedTarget).data('book-id');
-				alert("yo " + bookId);
-			});*/
-
-
-		//var id = 0;
-
-		//function getId(id){
-
-		//	return id;
-		//}
-
-		function func(txtBoxVals){
-
-			//var a = localStorage.getItem(id);
-			//var b = document.getElementsByTagName("label")[3];
-			//b.innerHTML = "puta";
-			//alert(a);
-
-			//document.getElementsByTagName('label')[3].innerHTML = "mf";
-			//b.innerHTML = "Puta";
-
-			for(var i = 0; i < txtBoxVals.length; i++){
-				//alert(txtBoxVals[i]);
-				//document.getElementsByTagName('label')[i].innerHTML = txtBoxVals[i];
-			}
-		}
 
 		function setID(x){
 
@@ -445,12 +307,10 @@
 			    
 			    $.ajax({ 
 					url: "delete.php",
-	         		//data: {action: 'test'},
 	         		type: "POST",
 	         		data: "id=" + id,
 	         		success: function(retrieved) {
 	                      
-	                    //alert(retrieved);
 	                    $('#myModal').modal("hide");
 
 	                    //reloads page so deleted record is no longer visible
@@ -487,6 +347,7 @@
 		function updateRecord() {
 				
 			var id = localStorage.getItem(id);
+			alert(id);
 			var name = document.getElementsByTagName('input')[2].value;
 			var position = document.getElementsByTagName('input')[3].value;
 			var skillLevel = document.getElementsByTagName('input')[4].value;
@@ -512,9 +373,6 @@
 
 		function styleModalForInsertClickEvent(){
 
-   			$(document.getElementsByTagName('input')[8]).attr('value', "");
-
-
    			//remove values from text boxes in the case that the modal has been opened and therefore populated with values.
    			$(document.getElementsByTagName('input')[2]).attr('value', "");
 	       	$(document.getElementsByTagName('input')[3]).attr('value', "");
@@ -523,15 +381,13 @@
 	       	$(document.getElementsByTagName('input')[6]).attr('value', "");
 	       	$(document.getElementsByTagName('input')[7]).attr('value', "");
 
-	       	//
+	       	//changes delete button to become insert button
 	       	$(document.getElementsByTagName('input')[8]).attr('value', "");
 	       	$(document.getElementsByTagName('input')[8]).attr('value', "Insert");
 	       	$(document.getElementsByTagName('input')[8]).attr('onclick', "insertRecord();");
 	       	$(document.getElementsByTagName('input')[8]).attr('class', "btn btn-warning");
 	       	
-
-
-	       	//$(document.getElementsByTagName('button')[1]).hide();
+	       	//hides update button
 	       	$(document.getElementsByTagName('button')[1]).hide();
 
    			$('#myModal').modal('show');
@@ -539,13 +395,14 @@
 
 		function styleDeleteButton_and_showUpdateButtons(){
 
+			//changes insert button to become delete button
 			$(document.getElementsByTagName('input')[8]).attr('value', "");
 			$(document.getElementsByTagName('input')[8]).attr('value', "Delete");
 	       	$(document.getElementsByTagName('input')[8]).attr('onclick', "deleteRecord();");
 	       	$(document.getElementsByTagName('input')[8]).attr('class', "btn btn-danger");
 
+	       	//shows update button
 			$(document.getElementsByTagName('button')[1]).show();
-	       	//$(document.getElementsByTagName('button')[2]).show();
 		}
 
 	</script>
